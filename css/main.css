@@ -1,0 +1,48 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+.header {
+  display: table;
+  width: 40%;
+  height: 5em;
+  margin: 2em auto 2em;
+  background-color: rgb(180, 180, 180);
+}
+
+.header h1 {
+  text-align: center;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.player-wrapper {
+  display: table;
+  width: 40%;
+  height: 5em;
+  margin: 2em auto 2em;
+  padding-top: 2em;
+  padding-bottom: 2em;
+  background-color: rgb(206, 206, 206);
+}
+
+.player-wrapper p {
+  text-align: center;
+  display: table-cell;
+  vertical-align: middle;
+}
+
+.display-wrapper {
+  display: table;
+  width: 40%;
+  margin: 2em auto 2em;
+  padding-top: 1em;
+  padding-bottom: 1em;
+}
+
+
+.display-wrapper p {
+  line-height: 1.7em;
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+
+    <title>MY AUDIO CIRCLE PLAYER</title>
+    <meta name="description" content="basic-site" />
+    <meta name="author" content="audioplayer" />
+    <link rel="stylesheet" href="css/main.css" />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+    <link href="/css/roundslider.min.css" rel="stylesheet" />
+  </head>
+
+  <body>
+    <div class="header">
+      <h1>AUDIO CIRCLE PLAYER</h1>
+    </div>
+
+    <div class="player-wrapper">
+      <p>
+        <button id="play-pause" disabled="true">
+          Please wait, loading ...
+        </button>
+      </p>
+    </div>
+    <div id="slider"></div>
+    <div class="display-wrapper">
+      <p>Current time global (seconds): <span id="time-current-global">0</span></p>
+      <p>Current time animation (seconds): <span id="time-current-animation">0</span></p>
+      <p>Max Duration: <span id="maxduration">0</span> seconds</p>
+    </div>
+    <script src="/scripts/jquery-1.11.3.min.js"></script>
+    <script src="/scripts/roundslider.min.js"></script>
+    <script src="/scripts/cp.js"></script>
+  </body>
+</html>
