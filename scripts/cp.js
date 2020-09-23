@@ -62,16 +62,11 @@ $('#slider').roundSlider({
 });
 
 $('#slider').on('drag, change', function (e) {
-  let $this = $(this);
-  let $elem = $this.closest('.js-audio');
-  source[source.stop ? 'stop' : 'noteOff'](0);
-  source = context.createBufferSource();
-  source.connect(context.destination);
-  source.buffer = buffer;
-  source.loop = true;
-  source.loopEnd = trackLength;
-  source[source.start ? 'start' : 'noteOn'](0, 0);
-  console.log($elem + '!');
+  var sliderValue = $('#slider').roundSlider("option", "value");
+  pausePlayback();
+  currTrackTime = (sliderValue / 100) * trackLength;
+  resumePlayback();
+  isPlaying = true;
 });
 
 ////•••• Provide global variables for the function togglePlay ••••////
@@ -83,35 +78,43 @@ var isPlaying = false;
 var startTime = 0;
 var startOffset = 0;
 var trackLength = beginBuffer.duration;
+var lastCtxTime = 0;
+var currTrackTime = 0;
 
 ////•••• PLAY PAUSE FUNCTION ••••////
 
+function pausePlayback() {
+  source[source.stop ? 'stop' : 'noteOff'](0);
+  startOffset += context.currentTime - startTime;
+  console.log('paused at', startOffset);
+  button.innerHTML =
+    '&nbsp;&nbsp;&nbsp;<i class="material-icons">play_arrow</i>&nbsp;&nbsp;&nbsp;';
+  cancelAnimationFrame(rAF);
+  context.suspend();
+}
+
+function resumePlayback() {
+  context.resume();
+  startTime = context.currentTime;
+  console.log('started at', startOffset);
+  source = context.createBufferSource();
+  source.connect(context.destination);
+  source.buffer = buffer;
+  source.loop = true;
+  source.loopEnd = trackLength;
+  // Start playback from the current track time.
+  source[source.start ? 'start' : 'noteOn'](0, currTrackTime);
+  button.innerHTML =
+    '&nbsp;&nbsp;&nbsp;<i class="material-icons">pause</i>&nbsp;&nbsp;&nbsp;';
+  document.getElementById('maxduration').innerText = trackLength;
+  rAF = requestAnimationFrame(timeUpdate);
+}
+
 function togglePlay() {
   if (isPlaying) {
-    // Stop Playback
-    source[source.stop ? 'stop' : 'noteOff'](0);
-    startOffset += context.currentTime - startTime;
-    console.log('paused at', startOffset);
-    // Save the position of the play head.
-    button.innerHTML =
-      '&nbsp;&nbsp;&nbsp;<i class="material-icons">play_arrow</i>&nbsp;&nbsp;&nbsp;';
-    cancelAnimationFrame(rAF);
-    context.suspend();
+    pausePlayback();
   } else {
-    context.resume();
-    startTime = context.currentTime;
-    console.log('started at', startOffset);
-    source = context.createBufferSource();
-    source.connect(context.destination);
-    source.buffer = buffer;
-    source.loop = true;
-    source.loopEnd = trackLength;
-    // Start playback, but make sure we stay in bound of the buffer.
-    source[source.start ? 'start' : 'noteOn'](0, startOffset % trackLength);
-    button.innerHTML =
-      '&nbsp;&nbsp;&nbsp;<i class="material-icons">pause</i>&nbsp;&nbsp;&nbsp;';
-    document.getElementById('maxduration').innerText = trackLength;
-    rAF = requestAnimationFrame(timeUpdate);
+    resumePlayback();
   }
   isPlaying = !isPlaying;
   // console.log(isPlaying);
@@ -122,13 +125,15 @@ function togglePlay() {
 function timeUpdate() {
   // Declaring Variables with Function scope and global scope (-->circleLength)
   trackLength = Math.round(buffer.duration);
-  var currentTime_animation = context.currentTime % trackLength;
+  currTrackTime += context.currentTime - lastCtxTime;
+  currTrackTime %= trackLength;
+  lastCtxTime = context.currentTime;
   var path = document.querySelector('.rs-path');
   circleLength = path.getTotalLength();
   // Calculations
-  calcRotate = 90 + (currentTime_animation / trackLength) * 360;
-  calcDasharr = 0 + (currentTime_animation / trackLength) * circleLength;
-  calcValue = (currentTime_animation / trackLength) * 100;
+  calcRotate = 90 + (currTrackTime / trackLength) * 360;
+  calcDasharr = 0 + (currTrackTime / trackLength) * circleLength;
+  calcValue = (currTrackTime / trackLength) * 100;
   // Changing and transforming CSS while audio track is playing
   document.querySelector('.rs-bar').style.transform =
     'rotate(' + calcRotate + 'deg)';
@@ -141,13 +146,13 @@ function timeUpdate() {
   document
     .querySelector('#slider > div > div.rs-bar.rs-transition.rs-first > div')
     .setAttribute('aria-valuenow', calcValue);
-  // print currentTime_animation to HTML-Doc
+  // print currTrackTime to HTML-Doc
   document.getElementById('time-current-global').innerText =
     context.currentTime;
   // print context.currentTime to HTML-Doc
   document.getElementById(
     'time-current-animation'
-  ).innerText = currentTime_animation;
+  ).innerText = currTrackTime;
   //Math.round(context.currentTime); --> just to round cT to seconds (for testing)
   rAF = requestAnimationFrame(timeUpdate); // close the timeUpdate-function-loop
 }
